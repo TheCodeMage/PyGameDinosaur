@@ -21,7 +21,7 @@ FPS = 60
 SCORE = 0
 Running = True
 
-myfont = pygame.font.SysFont('Comic Sans MS', 30) #Fuck you. Seriously, fuck you.
+myfont = pygame.font.SysFont('Comic Sans MS', 30)
 betterFont = pygame.font.SysFont("Comic Sans MS", 100) #Merriweather-Black.ttf
 
 PATH = inspect.getfile(inspect.currentframe()).strip('main_game.py')
