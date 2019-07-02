@@ -15,13 +15,17 @@ CLOCK = pygame.time.Clock()
 
 SCREEN = pygame.display.get_surface().get_size()
 BACKGROUND = pygame.Surface(SCREEN)
-BACKGROUND.fill((30, 90, 120))
+background_color = 30, 90, 120
+BACKGROUND.fill((background_color))
 
 FPS = 60
 SCORE = 0
 Running = True
+Time = 0
+RunRun = True
+Death = False
 
-myfont = pygame.font.SysFont('Comic Sans MS', 30)
+myFont = pygame.font.SysFont('Comic Sans MS', 30) #Fuck you. Seriously, fuck you.
 betterFont = pygame.font.SysFont("Comic Sans MS", 100) #Merriweather-Black.ttf
 
 PATH = inspect.getfile(inspect.currentframe()).strip('main_game.py')
@@ -70,7 +74,7 @@ class Player():
             
             self.right = False
             self.hitbox = (self.x_coord + 15, self.y_coord + 5, self.width, self.height)
-            pygame.draw.rect(WIN, (0, 255, 0), self.hitbox)
+            pygame.draw.rect(WIN, (background_color), self.hitbox)
             WIN.blit(pygame.transform.scale(jumpList[self.jumpCount // 3],(150,150)), (self.x_coord, self.y_coord))
             self.jumpCount += 1
 
@@ -86,7 +90,7 @@ class Player():
 
         if self.right:
             self.hitbox = (self.x_coord + 15, self.y_coord + 5, self.width, self.height)
-            pygame.draw.rect(WIN, (0, 255, 0), self.hitbox)
+            pygame.draw.rect(WIN, (background_color), self.hitbox)
             WIN.blit(pygame.transform.scale(walkRight[self.walkCount // 3],(150,150)), (self.x_coord, self.y_coord))
             self.walkCount += 1
 
@@ -153,7 +157,7 @@ class Bird(Enemy):
 
         if self.fly:
             self.hitbox = (self.x_coord + 50, self.y_coord + 40, self.width, self.height)
-            pygame.draw.rect(WIN, (0, 255, 0), self.hitbox)
+            pygame.draw.rect(WIN, (background_color), self.hitbox)
             WIN.blit(pygame.transform.scale(birdList[self.fly_count // 6], (170, 150)), (self.x_coord, self.y_coord))
 
 
@@ -169,7 +173,7 @@ class Plant(Enemy):
         self.y_coord = y
         self.width = width
         self.height = height
-        self.hitbox = (self.x_coord, self.y_coord + 5, 50, 60)
+        self.hitbox = (self.x_coord + 5, self.y_coord + 5, 50, 60)
         self.get_cactus = get_cactus
 
 
@@ -177,8 +181,8 @@ class Plant(Enemy):
         """
         Draws the PLANT on the screen
         """
-        self.hitbox = (self.x_coord, self.y_coord + 5, 70, 60)
-        pygame.draw.rect(WIN, (0, 255, 0), (self.hitbox))
+        self.hitbox = (self.x_coord + 5, self.y_coord + 5, 70, 60)
+        pygame.draw.rect(WIN, (background_color), (self.hitbox))
         WIN.blit(pygame.transform.scale(cactusList[self.get_cactus], (80, 70)), (self.x_coord, self.y_coord))
 
 class Score():
@@ -186,9 +190,10 @@ class Score():
         self.input_score = input_score
     
     def score(self):
-        textsurface = myfont.render(f'Je score is {str(self.input_score)}', False, (255, 255, 255))
-        WIN.blit(textsurface,(10, 10))
-        self.input_score += 1
+        textsurface = myFont.render(f'Je score is {str(round(self.input_score))}', False, (255, 255, 255))
+        size = myFont.size(f'Je score is {str(round(self.input_score))}')
+        WIN.blit(textsurface,(SCREEN[0]/2-size[0]/2, 10))
+        self.input_score += 1-1/FPS
 
     def death(self):
         BACKGROUND.fill((0, 0, 0))
@@ -197,16 +202,14 @@ class Score():
         size = betterFont.size("YOU DIED")
         WIN.blit(textsurface,(SCREEN[0]/2-size[0]/2,SCREEN[1]/2-size[1]/2))
 
-        textsurface = betterFont.render(f'You had a score of {SCORE.input_score}', False, (255, 255, 255))
-        size = betterFont.size(f'You had a score of {SCORE.input_score}')
+        textsurface = betterFont.render(f'You had a score of {round(SCORE.input_score)}', False, (255, 255, 255))
+        size = betterFont.size(f'You had a score of {round(SCORE.input_score)}')
         WIN.blit(textsurface,(SCREEN[0]/2-size[0]/2,SCREEN[1]/1.6-size[1]/2))
 
 
 PLAYER = Player(SCREEN[0] / 3, SCREEN[1] / 2.3, 75, 140, 4)
 SCORE = Score(0)
 THE_ENEMY = Enemy()
-RunRun = True
-Death = False
 
 while Running:
     WIN.blit(BACKGROUND, (0, 0))
@@ -219,11 +222,16 @@ while Running:
                 Death = True
 
         THE_ENEMY.timer()
+        PLAYER.walk()
         PLAYER.jump()
         SCORE.score()
+        Time += 1
     else:
         SCORE.death()
 
+    if Time == 600:
+        FPS += 5
+        Time = 0
     
     KEYS = pygame.key.get_pressed()
     for event in pygame.event.get():
@@ -235,7 +243,6 @@ while Running:
                 PLAYER.jumpforce = PLAYER.init_jf
 
     CLOCK.tick(FPS)
-    PLAYER.walk()
 
     pygame.display.update()
 
